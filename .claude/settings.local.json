@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite *)",
+      "Bash(cd \"/c/Users/zhaowenbo/Desktop/shiyi\" && find . -not -path './node_modules/*' -not -path './dist/*' -not -name '.DS_Store' | sort)",
+      "Read(//c/c/Users/zhaowenbo/Desktop/**)"
+    ]
+  }
+}
