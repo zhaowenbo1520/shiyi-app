@@ -153,6 +153,8 @@ export default function App() {
           <div className="home-header">
             <h1 className="home-title">拾遗</h1>
             <p className="home-subtitle">外部记忆助手</p>
+            {/* Tailwind verification badge — remove after confirming */}
+            <span className="fixed bottom-1 right-1 text-[10px] text-gray-400/50 select-none">tw</span>
           </div>
 
           <QuickRecord onSave={handleSave} />
