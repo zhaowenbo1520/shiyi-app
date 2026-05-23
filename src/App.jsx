@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import SplashScreen from './components/SplashScreen'
+
+const MIN_SPLASH_TIME = 2200
 import {
   getRecords,
   addRecord,
@@ -45,6 +47,13 @@ export default function App() {
   const [todayCompletedCount, setTodayCompletedCount] = useState(0)
   const [incompleteCount, setIncompleteCount] = useState(0)
   const [showSplash, setShowSplash] = useState(true)
+
+  // Guard: don't hide splash before MIN_SPLASH_TIME even if data loads early
+  const canHideRef = useRef(false)
+  useEffect(() => {
+    const id = setTimeout(() => { canHideRef.current = true }, MIN_SPLASH_TIME)
+    return () => clearTimeout(id)
+  }, [])
 
   function refresh() {
     setTodayTasks(getTodayTasks())
@@ -117,7 +126,18 @@ export default function App() {
 
   return (
     <>
-      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => {
+            // Only hide splash when both conditions are satisfied:
+            // 1. Data is loaded (synchronous refresh() above ensures this)
+            // 2. Minimum display time has elapsed (canHideRef)
+            if (canHideRef.current) {
+              setShowSplash(false)
+            }
+          }}
+        />
+      )}
       {!showSplash && (
         <div className="app">
           {/* 首页 */}

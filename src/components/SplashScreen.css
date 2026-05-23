@@ -1,5 +1,6 @@
 /* ============================================
    拾遗 SplashScreen — Time Note Animation
+   Total timeline: 0–2200ms main, 2200–2400ms exit
    ============================================ */
 
 /* ---------- Base overlay ---------- */
@@ -11,11 +12,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: splash-bg-in 0.28s ease-out both;
+  animation: splash-bg-in 0.3s ease-out both;
 }
 
 .splash-overlay.splash-exit {
-  animation: splash-bg-out 0.15s ease-out both;
+  animation: splash-bg-out 0.2s ease-out both;
 }
 
 @keyframes splash-bg-in {
@@ -40,31 +41,28 @@
   padding: 0 24px;
 }
 
-/* ---------- Visual area (ring + note) ---------- */
+/* ---------- Visual area (ring + note + drawer) ---------- */
 .splash-visual {
   position: relative;
-  width: 200px;
-  height: 170px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0;
+  width: 220px;
+  height: 270px;
 }
 
 /* ---------- Time ring ---------- */
 .splash-ring-container {
   position: absolute;
-  top: 50%;
+  top: 60px;
   left: 50%;
-  width: 132px;
-  height: 132px;
-  transform: translate(-50%, -50%);
-  animation: splash-ring-in 0.3s ease-out 0.28s both;
+  margin-left: -71px;
+  width: 142px;
+  height: 142px;
+  z-index: 1;
+  animation: splash-ring-in 0.45s ease-out 0.3s both;
 }
 
 @keyframes splash-ring-in {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 .splash-ring {
@@ -119,78 +117,64 @@
   top: 50%;
   left: 50%;
   width: 1.5px;
-  height: 42px;
+  height: 44px;
   margin-left: -0.75px;
-  margin-top: -42px;
+  margin-top: -44px;
   background: #7A7FF5;
   border-radius: 1px;
   transform-origin: bottom center;
-  animation: splash-hand-sweep 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+  animation: splash-hand-sweep 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
 }
 
 @keyframes splash-hand-sweep {
-  from { opacity: 0; transform: rotate(-28deg); }
-  to   { opacity: 1; transform: rotate(22deg); }
+  from { opacity: 0; transform: rotate(-25deg); }
+  to   { opacity: 1; transform: rotate(25deg); }
 }
 
-/* ---------- Storage slot ---------- */
-.splash-slot {
-  width: 156px;
-  height: 22px;
-  border-radius: 11px;
-  background: rgba(0, 0, 0, 0.015);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.025);
-  position: absolute;
-  top: 146px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: splash-slot-in 0.35s ease-out 0.85s both;
-}
-
-@keyframes splash-slot-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ---------- Note card wrapper (handles vertical motion) ---------- */
+/* ---------- Note card (handles vertical motion) ---------- */
 .splash-note-wrapper {
   position: absolute;
-  top: 50%;
+  top: 30px;
   left: 50%;
   margin-left: -84px;
-  margin-top: -56px;
   width: 168px;
   height: 112px;
-  animation: splash-note-journey 1.3s linear 0s both;
+  z-index: 2;
+  animation: splash-note-journey 2.2s ease 0s both;
 }
 
+/*
+  Note journey:
+  0–300ms  (0–13.6%):  rise from below, fade in
+  300–900ms (13.6–40.9%): hold at normal position
+  900–1350ms (40.9–61.4%): lift slightly (picked up)
+  1350–1750ms (61.4–79.5%): descend into drawer
+  1750–2200ms (79.5–100%): hold in drawer
+*/
 @keyframes splash-note-journey {
   0% {
     opacity: 0;
     transform: translateY(10px);
   }
-  21.5% {
-    /* 280ms: fully risen */
+  13.6% {
     opacity: 1;
     transform: translateY(0);
   }
-  50% {
-    /* 650ms: hold position */
+  40.9% {
+    opacity: 1;
     transform: translateY(0);
   }
-  61.5% {
-    /* 800ms: gently lifted */
-    transform: translateY(-4px);
+  61.4% {
+    opacity: 1;
+    transform: translateY(-5px);
   }
-  77% {
-    /* 1000ms: start settling */
-    transform: translateY(-4px);
+  79.5% {
+    opacity: 0.72;
+    transform: translateY(85px);
   }
   100% {
-    /* 1300ms: settled in slot */
-    transform: translateY(15px);
     opacity: 0.72;
+    transform: translateY(85px);
   }
 }
 
@@ -209,7 +193,6 @@
     0 4px 12px rgba(0, 0, 0, 0.03);
   position: relative;
   overflow: hidden;
-  /* Subtle paper texture overlay (applied via a pseudo-element) */
 }
 
 /* Paper texture */
@@ -241,11 +224,11 @@
   background: linear-gradient(
     225deg,
     transparent 50%,
-    rgba(0, 0, 0, 0.02) 50.5%
+    rgba(0, 0, 0, 0.025) 50.5%
   );
-  border-radius: 0 16px 0 4px;
+  border-radius: 0 16px 0 6px;
   opacity: 0;
-  animation: splash-corner-fold 0.35s ease-out 0.65s both;
+  animation: splash-corner-fold 0.45s ease-out 0.9s both;
   pointer-events: none;
 }
 
@@ -283,12 +266,75 @@
   margin-left: 1px;
 }
 
-/* ---------- Text ---------- */
+/* ============================================
+   Drawer / 收纳盒
+   ============================================ */
+.splash-drawer {
+  position: absolute;
+  top: 155px;
+  left: 50%;
+  margin-left: -80px;
+  width: 160px;
+  z-index: 3;
+  animation: splash-drawer-in 0.4s ease-out 0.65s both;
+}
+
+@keyframes splash-drawer-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Drawer body — the visible front face */
+.splash-drawer-body {
+  height: 38px;
+  border-radius: 14px;
+  background: #F2EFE8;
+  border: 1px solid rgba(47, 52, 64, 0.06);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.03),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* Opening line at top of drawer */
+.splash-drawer-body::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: rgba(47, 52, 64, 0.10);
+  border-radius: 1px;
+}
+
+/* Handle / knob */
+.splash-drawer-body::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 2px;
+  background: rgba(47, 52, 64, 0.16);
+  border-radius: 1px;
+}
+
+/* Invisible cover that hides the note below the drawer front */
+.splash-drawer-cover {
+  height: 50px;
+  background: #F7F4EE;
+}
+
+/* ============================================
+   Text
+   ============================================ */
 .splash-text {
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 40px;
 }
 
 .splash-title {
@@ -298,7 +344,7 @@
   letter-spacing: 4px;
   margin: 0;
   line-height: 1.3;
-  animation: splash-title-in 0.3s ease-out 1.15s both;
+  animation: splash-title-in 0.4s ease-out 1.65s both;
 }
 
 .splash-title::after {
@@ -331,7 +377,7 @@
   letter-spacing: 2px;
   margin: 6px 0 0;
   line-height: 1.4;
-  animation: splash-subtitle-in 0.3s ease-out 1.28s both;
+  animation: splash-subtitle-in 0.4s ease-out 1.8s both;
 }
 
 @keyframes splash-subtitle-in {
@@ -356,7 +402,8 @@
 
   .splash-ring-container,
   .splash-hand,
-  .splash-slot,
+  .splash-drawer,
+  .splash-drawer-cover,
   .splash-note-wrapper,
   .splash-title,
   .splash-subtitle {

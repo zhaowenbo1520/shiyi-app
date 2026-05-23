@@ -7,10 +7,9 @@ export default function SplashScreen({ onFinish }) {
   onFinishRef.current = onFinish
 
   useEffect(() => {
-    // Start exit fade at 1600ms (animations have completed)
-    const exitTimer = setTimeout(() => setExiting(true), 1600)
-    // Fully remove at 1750ms (150ms fade-out window)
-    const removeTimer = setTimeout(() => onFinishRef.current(), 1750)
+    // Full animation timeline: 2200ms main animation + 200ms exit
+    const exitTimer = setTimeout(() => setExiting(true), 2200)
+    const removeTimer = setTimeout(() => onFinishRef.current(), 2400)
 
     return () => {
       clearTimeout(exitTimer)
@@ -21,15 +20,8 @@ export default function SplashScreen({ onFinish }) {
   return (
     <div className={`splash-overlay${exiting ? ' splash-exit' : ''}`}>
       <div className="splash-scene">
-        {/* Storage slot */}
-        <div className="splash-slot" />
-
-        {/* Visual: ring + note */}
         <div className="splash-visual">
-          {/*
-            Time ring — fixed behind the note.
-            Four subtle tick marks + a second hand that sweeps ~50°.
-          */}
+          {/* Time ring — behind the note */}
           <div className="splash-ring-container">
             <div className="splash-ring">
               <span className="splash-ring-mark splash-ring-mark--top" />
@@ -40,10 +32,7 @@ export default function SplashScreen({ onFinish }) {
             <div className="splash-hand" />
           </div>
 
-          {/*
-            Note card — rises, lifts, then settles into the slot.
-            The card wraps a simple content area with two lines and a dot.
-          */}
+          {/* Note card — rises, lifts, then settles into drawer */}
           <div className="splash-note-wrapper">
             <div className="splash-note">
               <div className="splash-note-content">
@@ -52,6 +41,12 @@ export default function SplashScreen({ onFinish }) {
                 <div className="splash-note-dot" />
               </div>
             </div>
+          </div>
+
+          {/* Drawer / 收纳盒 — clearly visible */}
+          <div className="splash-drawer">
+            <div className="splash-drawer-body" />
+            <div className="splash-drawer-cover" />
           </div>
         </div>
 
