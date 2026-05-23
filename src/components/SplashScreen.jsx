@@ -7,14 +7,22 @@ export default function SplashScreen({ onFinish }) {
   onFinishRef.current = onFinish
 
   useEffect(() => {
-    // Full animation timeline: 2200ms main animation + 200ms exit
-    const exitTimer = setTimeout(() => setExiting(true), 2200)
-    const removeTimer = setTimeout(() => onFinishRef.current(), 2400)
+    const startTime = Date.now()
 
-    return () => {
-      clearTimeout(exitTimer)
-      clearTimeout(removeTimer)
-    }
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+
+      if (elapsed >= 2400) {
+        clearInterval(interval)
+        onFinishRef.current()
+        return
+      }
+      if (elapsed >= 2200) {
+        setExiting(true)
+      }
+    }, 50)
+
+    return () => clearInterval(interval)
   }, [])
 
   return (

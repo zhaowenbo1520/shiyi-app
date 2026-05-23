@@ -49,11 +49,10 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true)
 
   // Guard: don't hide splash before MIN_SPLASH_TIME even if data loads early
-  const canHideRef = useRef(false)
-  useEffect(() => {
-    const id = setTimeout(() => { canHideRef.current = true }, MIN_SPLASH_TIME)
-    return () => clearTimeout(id)
-  }, [])
+  // Uses Date.now() absolute timing so the minimum display time is guaranteed
+  // regardless of when React mounts the component.
+  const splashStartRef = useRef(Date.now())
+  const splashGuardRef = useRef(false)
 
   function refresh() {
     setTodayTasks(getTodayTasks())
@@ -129,11 +128,19 @@ export default function App() {
       {showSplash && (
         <SplashScreen
           onFinish={() => {
-            // Only hide splash when both conditions are satisfied:
-            // 1. Data is loaded (synchronous refresh() above ensures this)
-            // 2. Minimum display time has elapsed (canHideRef)
-            if (canHideRef.current) {
+            // Guard: only hide splash when minimum display time has elapsed.
+            // Uses absolute Date.now() to avoid setTimeout drift issues.
+            if (splashGuardRef.current) return
+            const elapsed = Date.now() - splashStartRef.current
+            if (elapsed >= MIN_SPLASH_TIME) {
+              splashGuardRef.current = true
               setShowSplash(false)
+            } else {
+              // Timer fired early — retry after remaining time
+              setTimeout(() => {
+                splashGuardRef.current = true
+                setShowSplash(false)
+              }, MIN_SPLASH_TIME - elapsed)
             }
           }}
         />
