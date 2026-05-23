@@ -7,28 +7,36 @@ import {
   postponeRecord as postponeInStorage,
   changeType as changeTypeInStorage,
   getTodayTasks,
+  getReminderItems,
   getShoppingItems,
   getIdeaItems,
+  getKnowledgeItems,
   getCollectionItems
 } from './utils/storage'
 import QuickRecord from './components/QuickRecord'
 import TodayTasks from './components/TodayTasks'
+import ReminderList from './components/ReminderList'
 import ShoppingList from './components/ShoppingList'
 import IdeaBox from './components/IdeaBox'
+import KnowledgeBox from './components/KnowledgeBox'
 import CollectionBox from './components/CollectionBox'
 import './App.css'
 
 export default function App() {
   const [todayTasks, setTodayTasks] = useState([])
+  const [reminderItems, setReminderItems] = useState([])
   const [shoppingItems, setShoppingItems] = useState([])
   const [ideaItems, setIdeaItems] = useState([])
+  const [knowledgeItems, setKnowledgeItems] = useState([])
   const [collectionItems, setCollectionItems] = useState([])
   const [totalCount, setTotalCount] = useState(0)
 
   function refresh() {
     setTodayTasks(getTodayTasks())
+    setReminderItems(getReminderItems())
     setShoppingItems(getShoppingItems())
     setIdeaItems(getIdeaItems())
+    setKnowledgeItems(getKnowledgeItems())
     setCollectionItems(getCollectionItems())
     setTotalCount(getRecords().filter(r => !r.completed).length)
   }
@@ -83,6 +91,14 @@ export default function App() {
           onChangeType={handleChangeType}
         />
 
+        <ReminderList
+          items={reminderItems}
+          onComplete={handleComplete}
+          onDelete={handleDelete}
+          onPostpone={handlePostpone}
+          onChangeType={handleChangeType}
+        />
+
         <ShoppingList
           items={shoppingItems}
           onComplete={handleComplete}
@@ -93,6 +109,14 @@ export default function App() {
 
         <IdeaBox
           items={ideaItems}
+          onComplete={handleComplete}
+          onDelete={handleDelete}
+          onPostpone={handlePostpone}
+          onChangeType={handleChangeType}
+        />
+
+        <KnowledgeBox
+          items={knowledgeItems}
           onComplete={handleComplete}
           onDelete={handleDelete}
           onPostpone={handlePostpone}

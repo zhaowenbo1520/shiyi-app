@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { getTypeLabel, getTypeIcon } from '../utils/categorize'
 
 const TYPE_OPTIONS = [
-  { value: 'task', label: '任务' },
+  { value: 'task', label: '待办' },
+  { value: 'reminder', label: '提醒' },
   { value: 'shopping', label: '购物' },
-  { value: 'idea', label: '创意' },
-  { value: 'reminder', label: '提醒' }
+  { value: 'idea', label: '想法' },
+  { value: 'knowledge', label: '知识' },
+  { value: 'inbox', label: '收集箱' }
 ]
 
 export default function ItemCard({ item, onComplete, onDelete, onPostpone, onChangeType }) {

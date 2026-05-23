@@ -1,13 +1,13 @@
 import ItemCard from './ItemCard'
 
-export default function IdeaBox({ items, onComplete, onDelete, onPostpone, onChangeType }) {
+export default function ReminderList({ items, onComplete, onDelete, onPostpone, onChangeType }) {
   if (items.length === 0) {
     return null
   }
 
   return (
     <div className="section">
-      <h2 className="section-title">💡 想法库</h2>
+      <h2 className="section-title">⏰ 提醒</h2>
       {items.map(item => (
         <ItemCard
           key={item.id}

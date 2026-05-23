@@ -1,27 +1,31 @@
 /**
  * 自动分类规则
- * 优先级：提醒 > 购物 > 创意 > 任务
+ * 优先级：提醒 > 购物 > 想法 > 知识 > 待办
  */
 
 const RULES = [
   {
     type: 'reminder',
-    keywords: ['提醒', '明天', '今晚', '今天', '周末', '几点', '早上', '下午', '晚上', '后天', '大后天', '下周', '下个月']
+    keywords: ['提醒', '明天', '今晚', '今天', '周末', '几点', '早上', '下午', '晚上', '后天', '下周']
   },
   {
     type: 'shopping',
-    keywords: ['买', '采购', '下单', '超市', '网购', '购物']
+    keywords: ['买', '采购', '下单', '超市', '网购']
   },
   {
     type: 'idea',
-    keywords: ['创意', '想法', '灵感', '点子', '选题']
+    keywords: ['创意', '想法', '灵感', '点子', '选题', '产品想法']
+  },
+  {
+    type: 'knowledge',
+    keywords: ['知识', '概念', '方法', '原则', '经验', '学习', '记住', '笔记', '理论', '公式', '定义', '什么意思', '总结']
   }
 ]
 
 /**
  * 根据输入内容自动判断分类
  * @param {string} content
- * @returns {'task' | 'shopping' | 'idea' | 'reminder'}
+ * @returns {'task' | 'reminder' | 'shopping' | 'idea' | 'knowledge' | 'inbox'}
  */
 export function categorize(content) {
   if (!content || typeof content !== 'string') return 'task'
@@ -45,10 +49,12 @@ export function categorize(content) {
  */
 export function getTypeLabel(type) {
   const labels = {
-    task: '任务',
+    task: '待办',
+    reminder: '提醒',
     shopping: '购物',
-    idea: '创意',
-    reminder: '提醒'
+    idea: '想法',
+    knowledge: '知识',
+    inbox: '收集箱'
   }
   return labels[type] || '其他'
 }
@@ -59,9 +65,11 @@ export function getTypeLabel(type) {
 export function getTypeIcon(type) {
   const icons = {
     task: '📋',
+    reminder: '⏰',
     shopping: '🛒',
     idea: '💡',
-    reminder: '⏰'
+    knowledge: '📖',
+    inbox: '📥'
   }
   return icons[type] || '📝'
 }

@@ -135,7 +135,7 @@ export function changeType(id, newType) {
 
 /**
  * 获取今日待办（最多 3 条）
- * 规则：未完成的任务和提醒，未被推迟到明天或更晚
+ * 规则：未完成的 task，未被推迟到明天或更晚
  */
 export function getTodayTasks() {
   const records = getRecords()
@@ -144,11 +144,26 @@ export function getTodayTasks() {
   return records
     .filter(r => {
       if (r.completed) return false
-      if (r.type !== 'task' && r.type !== 'reminder') return false
+      if (r.type !== 'task') return false
       if (r.postponedUntil && r.postponedUntil > today) return false
       return true
     })
     .slice(0, 3)
+}
+
+/**
+ * 获取提醒列表
+ */
+export function getReminderItems() {
+  const records = getRecords()
+  const today = getTodayStr()
+
+  return records.filter(r => {
+    if (r.completed) return false
+    if (r.type !== 'reminder') return false
+    if (r.postponedUntil && r.postponedUntil > today) return false
+    return true
+  })
 }
 
 /**
@@ -160,7 +175,7 @@ export function getShoppingItems() {
 }
 
 /**
- * 获取创意列表
+ * 获取想法列表（含已完成，想法永不消失）
  */
 export function getIdeaItems() {
   const records = getRecords()
@@ -168,19 +183,27 @@ export function getIdeaItems() {
 }
 
 /**
+ * 获取知识列表（含已完成，知识需要随时查阅）
+ */
+export function getKnowledgeItems() {
+  const records = getRecords()
+  return records.filter(r => r.type === 'knowledge')
+}
+
+/**
  * 获取收集箱内容
- * 规则：排除了今日待办、购物清单、创意库之后，剩下的未完成事项
+ * 规则：inbox 类型未完成事项 + 其他未展示的未完成剩余事项
  */
 export function getCollectionItems() {
   const records = getRecords()
   const today = getTodayStr()
 
-  // 今日已展示的任务/提醒 ID（前 3 条）
+  // 今日已展示的 task ID（前 3 条）
   const todayTaskIds = new Set(
     records
       .filter(r => {
         if (r.completed) return false
-        if (r.type !== 'task' && r.type !== 'reminder') return false
+        if (r.type !== 'task') return false
         if (r.postponedUntil && r.postponedUntil > today) return false
         return true
       })
@@ -190,9 +213,13 @@ export function getCollectionItems() {
 
   return records.filter(r => {
     if (r.completed) return false
+    // 已在其他版块展示的排除
+    if (r.type === 'task' && todayTaskIds.has(r.id)) return false
     if (r.type === 'shopping') return false
     if (r.type === 'idea') return false
-    if (todayTaskIds.has(r.id)) return false
+    if (r.type === 'knowledge') return false
+    // reminder 已在提醒版块展示
+    if (r.type === 'reminder') return false
     return true
   })
 }
