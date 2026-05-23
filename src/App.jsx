@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import SplashScreen from './components/SplashScreen'
 import {
   getRecords,
   addRecord,
@@ -43,6 +44,7 @@ export default function App() {
   const [completedGrouped, setCompletedGrouped] = useState([])
   const [todayCompletedCount, setTodayCompletedCount] = useState(0)
   const [incompleteCount, setIncompleteCount] = useState(0)
+  const [showSplash, setShowSplash] = useState(true)
 
   function refresh() {
     setTodayTasks(getTodayTasks())
@@ -114,9 +116,12 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      {/* 首页 */}
-      {activeTab === 'home' && (
+    <>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {!showSplash && (
+        <div className="app">
+          {/* 首页 */}
+          {activeTab === 'home' && (
         <main className="app-main">
           <div className="home-header">
             <h1 className="home-title">拾遗</h1>
@@ -293,5 +298,7 @@ export default function App() {
         completedCount={todayCompletedCount}
       />
     </div>
+      )}
+    </>
   )
 }
