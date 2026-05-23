@@ -1,4 +1,5 @@
 import { categorize } from './categorize'
+import { getDateStr, getTodayStr } from './date'
 
 const STORAGE_KEY = 'shiyi-records'
 
@@ -10,26 +11,32 @@ function generateId() {
 }
 
 /**
- * 获取今天的日期字符串（YYYY-MM-DD）
+ * 归一化记录，确保所有字段存在
+ * 兼容旧数据：如果 completed 但缺少 completedAt，从 updatedAt 或 createdAt 推断
  */
-function getTodayStr() {
-  const d = new Date()
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+function normalizeRecord(record) {
+  const r = record || {}
 
-/**
- * 获取明天的日期字符串
- */
-export function getTomorrowStr() {
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  // 如果已完成但缺少 completedAt，尝试推断
+  if (r.completed && !r.completedAt) {
+    r.completedAt = r.updatedAt || r.createdAt || null
+  }
+
+  // 确保 completedAt 字段存在（未完成时设为 null）
+  if (!r.completed) {
+    r.completedAt = r.completedAt || null
+  }
+
+  // 确保其他字段存在
+  r.id = r.id || generateId()
+  r.content = r.content || ''
+  r.type = r.type || 'task'
+  r.createdAt = r.createdAt || new Date().toISOString()
+  r.updatedAt = r.updatedAt || new Date().toISOString()
+  r.postponedUntil = r.postponedUntil || null
+  r.originalText = r.originalText || r.content
+
+  return r
 }
 
 /**
@@ -38,7 +45,8 @@ export function getTomorrowStr() {
 export function getRecords() {
   try {
     const data = localStorage.getItem(STORAGE_KEY)
-    return data ? JSON.parse(data) : []
+    const records = data ? JSON.parse(data) : []
+    return records.map(normalizeRecord)
   } catch {
     return []
   }
@@ -70,6 +78,7 @@ export function addRecord(content) {
     content: trimmed,
     type,
     completed: false,
+    completedAt: null,
     createdAt: now,
     updatedAt: now,
     postponedUntil: null,
@@ -113,17 +122,35 @@ export function deleteRecord(id) {
 }
 
 /**
- * 标记为完成
+ * 标记为完成（记录完成时间）
  */
 export function completeRecord(id) {
-  return updateRecord(id, { completed: true })
+  return updateRecord(id, {
+    completed: true,
+    completedAt: new Date().toISOString()
+  })
+}
+
+/**
+ * 恢复为未完成
+ */
+export function restoreRecord(id) {
+  return updateRecord(id, {
+    completed: false,
+    completedAt: null
+  })
 }
 
 /**
  * 推迟到明天
  */
 export function postponeRecord(id) {
-  return updateRecord(id, { postponedUntil: getTomorrowStr() })
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return updateRecord(id, { postponedUntil: `${year}-${month}-${day}` })
 }
 
 /**
@@ -175,7 +202,7 @@ export function getShoppingItems() {
 }
 
 /**
- * 获取想法列表（含已完成，想法永不消失）
+ * 获取想法列表（含已完成）
  */
 export function getIdeaItems() {
   const records = getRecords()
@@ -183,7 +210,7 @@ export function getIdeaItems() {
 }
 
 /**
- * 获取知识列表（含已完成，知识需要随时查阅）
+ * 获取知识列表（含已完成）
  */
 export function getKnowledgeItems() {
   const records = getRecords()
@@ -191,8 +218,7 @@ export function getKnowledgeItems() {
 }
 
 /**
- * 获取收集箱内容
- * 规则：inbox 类型未完成事项 + 其他未展示的未完成剩余事项
+ * 获取收集箱内容（未完成的 inbox + 其他未展示的剩余未完成事项）
  */
 export function getCollectionItems() {
   const records = getRecords()
@@ -213,15 +239,50 @@ export function getCollectionItems() {
 
   return records.filter(r => {
     if (r.completed) return false
-    // 已在其他版块展示的排除
     if (r.type === 'task' && todayTaskIds.has(r.id)) return false
     if (r.type === 'shopping') return false
     if (r.type === 'idea') return false
     if (r.type === 'knowledge') return false
-    // reminder 已在提醒版块展示
     if (r.type === 'reminder') return false
     return true
   })
+}
+
+/**
+ * 获取所有已完成记录，按 completedAt 降序排列
+ */
+export function getCompletedItems() {
+  const records = getRecords()
+  return records
+    .filter(r => r.completed && r.completedAt)
+    .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
+}
+
+/**
+ * 按日期分组已完成记录
+ * 返回：[[dateStr, [items]], ...]
+ */
+export function getCompletedItemsGrouped() {
+  const items = getCompletedItems()
+  const groups = {}
+
+  for (const item of items) {
+    const dateStr = getDateStr(item.completedAt) || 'unknown'
+    if (!groups[dateStr]) groups[dateStr] = []
+    groups[dateStr].push(item)
+  }
+
+  // 按日期降序排列
+  return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]))
+}
+
+/**
+ * 获取今日完成的条目数量
+ */
+export function getTodayCompletedCount() {
+  const records = getRecords()
+  const today = getTodayStr()
+  return records.filter(r => r.completed && r.completedAt && getDateStr(r.completedAt) === today).length
 }
 
 /**

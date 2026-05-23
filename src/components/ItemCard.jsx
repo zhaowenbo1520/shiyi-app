@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getTypeLabel, getTypeIcon } from '../utils/categorize'
+import { formatTime } from '../utils/date'
 
 const TYPE_OPTIONS = [
   { value: 'task', label: '待办' },
@@ -13,6 +14,7 @@ const TYPE_OPTIONS = [
 export default function ItemCard({ item, onComplete, onDelete, onPostpone, onChangeType }) {
   const [showMenu, setShowMenu] = useState(false)
   const [showTypePicker, setShowTypePicker] = useState(false)
+  const isCompleted = item.completed
 
   function handleComplete() {
     setShowMenu(false)
@@ -38,14 +40,28 @@ export default function ItemCard({ item, onComplete, onDelete, onPostpone, onCha
   const typeLabel = getTypeLabel(item.type)
   const typeIcon = getTypeIcon(item.type)
 
+  if (isCompleted) {
+    return (
+      <div className="item-card completed">
+        <div className="item-main">
+          <span className="item-type-badge">{typeIcon} {typeLabel}</span>
+          <p className="item-content">{item.content}</p>
+          {item.completedAt && (
+            <span className="item-time">{formatTime(item.completedAt)}</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={`item-card ${item.completed ? 'completed' : ''}`}>
+    <div className="item-card">
       <div className="item-main">
         <span className="item-type-badge">{typeIcon} {typeLabel}</span>
         <p className="item-content">{item.content}</p>
         <button
           className="btn-icon"
-          onClick={() => setShowMenu(!showMenu)}
+          onClick={() => { setShowMenu(!showMenu); setShowTypePicker(false) }}
           aria-label="更多操作"
         >
           ···
@@ -54,24 +70,20 @@ export default function ItemCard({ item, onComplete, onDelete, onPostpone, onCha
 
       {showMenu && (
         <div className="item-menu">
-          {!item.completed && (
-            <>
-              <button className="btn btn-soft" onClick={handleComplete}>
-                ✅ 已经完成
-              </button>
-              <button className="btn btn-soft" onClick={handlePostpone}>
-                📅 明天再说
-              </button>
-              <button
-                className="btn btn-soft"
-                onClick={() => setShowTypePicker(!showTypePicker)}
-              >
-                🏷️ 改分类
-              </button>
-            </>
-          )}
-          <button className="btn btn-soft btn-danger" onClick={handleDelete}>
-            🗑️ 删除
+          <button className="btn btn-soft btn-complete" onClick={handleComplete}>
+            已完成
+          </button>
+          <button className="btn btn-soft" onClick={handlePostpone}>
+            明天再说
+          </button>
+          <button
+            className="btn btn-soft"
+            onClick={() => setShowTypePicker(!showTypePicker)}
+          >
+            改分类
+          </button>
+          <button className="btn btn-soft btn-danger-soft" onClick={handleDelete}>
+            删除
           </button>
         </div>
       )}
