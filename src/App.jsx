@@ -25,6 +25,16 @@ import TodayTasks from './components/TodayTasks'
 import ItemCard from './components/ItemCard'
 import CompletedPage from './components/CompletedPage'
 import BottomNav from './components/BottomNav'
+import { Button } from './components/ui/Button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from './components/ui/Dialog'
+import { Toaster } from './components/ui/Toast'
+import { Info } from 'lucide-react'
 import './App.css'
 
 const CATEGORY_ENTRIES = [
@@ -47,6 +57,7 @@ export default function App() {
   const [todayCompletedCount, setTodayCompletedCount] = useState(0)
   const [incompleteCount, setIncompleteCount] = useState(0)
   const [showSplash, setShowSplash] = useState(true)
+  const [showAbout, setShowAbout] = useState(false)
 
   // Guard: don't hide splash before MIN_SPLASH_TIME even if data loads early
   // Uses Date.now() absolute timing so the minimum display time is guaranteed
@@ -208,6 +219,17 @@ export default function App() {
             </div>
             <span className="completed-entry-arrow">›</span>
           </button>
+
+          {/* shadcn 组件验证 — 非关键测试按钮 */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2"
+            onClick={() => setShowAbout(true)}
+          >
+            <Info className="-ml-0.5 h-4 w-4" />
+            关于拾遗
+          </Button>
         </main>
       )}
 
@@ -326,6 +348,28 @@ export default function App() {
         onTabChange={setActiveTab}
         completedCount={todayCompletedCount}
       />
+
+      {/* shadcn Dialog 验证 */}
+      <Dialog open={showAbout} onOpenChange={setShowAbout}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>拾遗</DialogTitle>
+            <DialogDescription>外部记忆助手 v0.1.0</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>快速记录想法、待办、购物清单等生活琐事。</p>
+            <p>所有数据存储在本地，不会上传到云端。</p>
+            <p className="pt-2 text-xs text-muted-foreground/60">
+              UI 组件: shadcn/ui + Tailwind CSS v4
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setShowAbout(false)}>知道了</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Toaster />
     </div>
       )}
     </>
